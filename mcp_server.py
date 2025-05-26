@@ -43,11 +43,9 @@ def search_test(collection: str, query: str):
     print(res)
 
 
-
-
 @mcp.tool(
-    name="search_cafe",
-    description="Search cafe post from daum cafe",
+    name="search_cafe_trend",
+    description="Search trending posts for the entered query in Daum Cafe.",
 )
 async def search_cafe(
     query: str,
@@ -85,8 +83,44 @@ async def search_cafe(
         return cafe_docs
 
 @mcp.tool(
+    name="search_cafe",
+    description="Search posts for the entered query in Daum Cafe.",
+)
+async def search_cafe(
+    query: str,
+    display: int = 50,
+    page: int = 1,
+):
+    """
+    Search cafe post from kakao search api.
+
+    Args:
+        query (str): The query to search for.
+        display (int, optional): The number of items to display. Defaults to 10.
+        page (int, optional): The page for the search. Defaults to 1.
+    """
+    async with httpx.AsyncClient() as client:
+        response = await client.get(
+            cafe_api,
+            params={
+                "query": query,
+                "size": display,
+                "page": page,
+            },
+            headers={
+                "Authorization": f"KakaoAK {kakao_app_key}"
+            }
+        )
+
+        response.raise_for_status()
+        result = response.json()
+        cafe_docs = result['documents']
+
+        return cafe_docs
+
+@mcp.tool(
     name="search_web",
-    description="Search web page from kakao search",
+    description="Search web page",
 )
 async def search_web(
         query: str,
@@ -123,7 +157,7 @@ async def search_web(
 
 @mcp.tool(
     name="search_blog",
-    description="Search blog post from kakao",
+    description="Search blog post",
 )
 async def search_cafe(
         query: str,
